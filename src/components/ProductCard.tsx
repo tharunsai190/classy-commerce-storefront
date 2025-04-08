@@ -21,7 +21,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
       ...(product.colors && { color: product.colors[0] })
     });
     
-    toast.success(`${product.name} added to cart`);
+    toast(`${product.name} added to cart`, {
+      description: "Item has been added to your cart"
+    });
   };
 
   return (

@@ -1,5 +1,5 @@
 
-import { Order } from "@/types/order";
+import { Order, OrderItem, OrderStatus } from "@/types/order";
 import { products } from "./products";
 
 // Mock orders data
@@ -9,20 +9,38 @@ export const orders: Order[] = [
     userId: "user-123",
     items: [
       {
-        product: products[0],
+        productId: products[0].id,
+        productName: products[0].name,
+        price: products[0].price,
         quantity: 2,
-        size: "L"
+        size: "L",
+        image: products[0].images[0],
+        product: products[0] // For backward compatibility
       },
       {
-        product: products[2],
+        productId: products[2].id,
+        productName: products[2].name,
+        price: products[2].price,
         quantity: 1,
-        size: "M"
+        size: "M",
+        image: products[2].images[0],
+        product: products[2] // For backward compatibility
       }
     ],
     totalAmount: 169.97,
-    status: "delivered",
+    status: "delivered" as OrderStatus,
     paymentMethod: "credit_card",
+    paymentStatus: "paid",
+    orderStatus: "delivered",
     shippingAddress: {
+      fullName: "John Doe",
+      street: "123 Main St",
+      city: "San Francisco",
+      state: "CA",
+      zipCode: "94105",
+      country: "United States"
+    },
+    address: {
       fullName: "John Doe",
       street: "123 Main St",
       city: "San Francisco",
@@ -39,14 +57,28 @@ export const orders: Order[] = [
     userId: "user-123",
     items: [
       {
-        product: products[3],
-        quantity: 1
+        productId: products[3].id,
+        productName: products[3].name,
+        price: products[3].price,
+        quantity: 1,
+        image: products[3].images[0],
+        product: products[3] // For backward compatibility
       }
     ],
     totalAmount: 89.99,
-    status: "shipped",
+    status: "shipped" as OrderStatus,
     paymentMethod: "paypal",
+    paymentStatus: "paid",
+    orderStatus: "shipped",
     shippingAddress: {
+      fullName: "John Doe",
+      street: "123 Main St",
+      city: "San Francisco",
+      state: "CA",
+      zipCode: "94105",
+      country: "United States"
+    },
+    address: {
       fullName: "John Doe",
       street: "123 Main St",
       city: "San Francisco",
@@ -63,25 +95,47 @@ export const orders: Order[] = [
     userId: "user-123",
     items: [
       {
-        product: products[4],
+        productId: products[4].id,
+        productName: products[4].name,
+        price: products[4].price,
         quantity: 1,
-        size: "M"
+        size: "M",
+        image: products[4].images[0],
+        product: products[4] // For backward compatibility
       },
       {
-        product: products[6],
-        quantity: 1
+        productId: products[6].id,
+        productName: products[6].name,
+        price: products[6].price,
+        quantity: 1,
+        image: products[6].images[0],
+        product: products[6] // For backward compatibility
       },
       {
-        product: products[7],
+        productId: products[7].id,
+        productName: products[7].name,
+        price: products[7].price,
         quantity: 2,
         size: "S",
-        color: "Beige"
+        color: "Beige",
+        image: products[7].images[0],
+        product: products[7] // For backward compatibility
       }
     ],
     totalAmount: 249.96,
-    status: "processing",
+    status: "processing" as OrderStatus,
     paymentMethod: "credit_card",
+    paymentStatus: "paid",
+    orderStatus: "processing",
     shippingAddress: {
+      fullName: "John Doe",
+      street: "123 Main St",
+      city: "San Francisco",
+      state: "CA",
+      zipCode: "94105",
+      country: "United States"
+    },
+    address: {
       fullName: "John Doe",
       street: "123 Main St",
       city: "San Francisco",
@@ -97,14 +151,28 @@ export const orders: Order[] = [
     userId: "user-123",
     items: [
       {
-        product: products[9],
-        quantity: 1
+        productId: products[9].id,
+        productName: products[9].name,
+        price: products[9].price,
+        quantity: 1,
+        image: products[9].images[0],
+        product: products[9] // For backward compatibility
       }
     ],
     totalAmount: 49.99,
-    status: "pending",
+    status: "pending" as OrderStatus,
     paymentMethod: "apple_pay",
+    paymentStatus: "pending",
+    orderStatus: "processing",
     shippingAddress: {
+      fullName: "John Doe",
+      street: "123 Main St",
+      city: "San Francisco",
+      state: "CA",
+      zipCode: "94105",
+      country: "United States"
+    },
+    address: {
       fullName: "John Doe",
       street: "123 Main St",
       city: "San Francisco",

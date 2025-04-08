@@ -19,6 +19,7 @@ import ReviewForm from '@/components/ReviewForm';
 import ReviewDisplay from '@/components/ReviewDisplay';
 import { submitProductReview } from '@/utils/dbUtils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Product } from '@/types/product';
 
 const OrdersPage = () => {
   const { user } = useAuth();
@@ -140,8 +141,8 @@ const OrdersPage = () => {
                     <TableCell className="hidden md:table-cell">{formatDate(order.createdAt)}</TableCell>
                     <TableCell>
                       <div className="flex items-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusStyle(order.status)}`}>
-                          {getStatusIcon(order.status)}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusStyle(order.status as OrderStatus)}`}>
+                          {getStatusIcon(order.status as OrderStatus)}
                           <span className="ml-1 capitalize">{order.status}</span>
                         </span>
                       </div>
@@ -195,18 +196,18 @@ const OrdersPage = () => {
                                 <div className="flex items-center">
                                   <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                                     <img
-                                      src={item.product.images[0]}
-                                      alt={item.product.name}
+                                      src={item.image}
+                                      alt={item.productName}
                                       className="h-full w-full object-cover object-center"
                                     />
                                   </div>
                                   <div className="ml-4 flex-1">
                                     <Link 
-                                      to={`/product/${item.product.id}`}
+                                      to={`/product/${item.productId}`}
                                       className="font-medium text-sm hover:text-primary"
                                       onClick={(e) => e.stopPropagation()}
                                     >
-                                      {item.product.name}
+                                      {item.productName}
                                     </Link>
                                     <div className="flex justify-between mt-1">
                                       <div className="text-sm text-gray-500">
@@ -215,7 +216,7 @@ const OrdersPage = () => {
                                         <span className="mx-2">Qty: {item.quantity}</span>
                                       </div>
                                       <p className="text-sm font-medium">
-                                        ${((item.product.salePrice || item.product.price) * item.quantity).toFixed(2)}
+                                        ${(item.price * item.quantity).toFixed(2)}
                                       </p>
                                     </div>
                                   </div>
@@ -226,9 +227,9 @@ const OrdersPage = () => {
                                   <div className="ml-20 mt-2">
                                     {reviewingProduct && 
                                      reviewingProduct.orderId === order.id && 
-                                     reviewingProduct.productId === item.product.id ? (
+                                     reviewingProduct.productId === item.productId ? (
                                       <ReviewForm 
-                                        product={item.product} 
+                                        product={item.product as Product} 
                                         onSubmit={handleSubmitReview}
                                         onCancel={() => setReviewingProduct(null)}
                                       />
@@ -242,7 +243,7 @@ const OrdersPage = () => {
                                             e.stopPropagation();
                                             setReviewingProduct({
                                               orderId: order.id,
-                                              productId: item.product.id
+                                              productId: item.productId
                                             });
                                           }}
                                         >
@@ -256,21 +257,21 @@ const OrdersPage = () => {
                                           className="text-xs"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            toggleProductReviews(item.product.id);
+                                            toggleProductReviews(item.productId);
                                           }}
                                         >
-                                          {showReviews[item.product.id] ? 'Hide Reviews' : 'Show Reviews'}
+                                          {showReviews[item.productId] ? 'Hide Reviews' : 'Show Reviews'}
                                         </Button>
                                       </div>
                                     )}
 
                                     <Collapsible
-                                      open={showReviews[item.product.id]}
+                                      open={showReviews[item.productId]}
                                       onOpenChange={() => {}}
                                       className="mt-2"
                                     >
                                       <CollapsibleContent>
-                                        <ReviewDisplay productId={item.product.id} className="mt-3 ml-2 border-t pt-3" />
+                                        <ReviewDisplay productId={item.productId} className="mt-3 ml-2 border-t pt-3" />
                                       </CollapsibleContent>
                                     </Collapsible>
                                   </div>

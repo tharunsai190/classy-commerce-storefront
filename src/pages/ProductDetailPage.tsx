@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,8 @@ const ProductDetailPage = () => {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [activeTab, setActiveTab] = useState<'description' | 'reviews'>('description');
-  
+  const [reviewKey, setReviewKey] = useState(0);
+
   const { addToCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   
@@ -37,11 +37,9 @@ const ProductDetailPage = () => {
         setSelectedSize(fetchedProduct.sizes ? fetchedProduct.sizes[0] : undefined);
         setSelectedColor(fetchedProduct.colors ? fetchedProduct.colors[0] : undefined);
         
-        // Get related products
         const related = getRelatedProducts(id);
         setRelatedProducts(related);
         
-        // Get reviews
         const fetchReviews = async () => {
           try {
             const productReviews = await getProductReviews(id);
@@ -74,26 +72,38 @@ const ProductDetailPage = () => {
       color: selectedColor
     });
     
-    toast.success(`${product.name} added to cart`);
+    toast(`${product.name} added to cart`, {
+      description: `Size: ${selectedSize || 'N/A'}, Quantity: ${quantity}`
+    });
   };
   
-  const handleSubmitReview = async (rating: number, comment: string) => {
-    if (!product || !isAuthenticated || !user) return;
-    
+  const handleAddReview = async (data: { rating: number; comment: string }) => {
+    if (!user) {
+      toast("Please sign in to leave a review", {
+        description: "You need to be logged in to write a review"
+      });
+      return;
+    }
+
     try {
-      const newReview = await submitProductReview(
+      await submitProductReview(
         user.id,
-        `${user.firstName} ${user.lastName}`,
+        `${user.firstName} ${user.lastName}`, 
         product.id,
-        rating,
-        comment
+        data.rating,
+        data.comment
       );
+      toast("Review submitted", {
+        description: "Thank you for your feedback!"
+      });
       
-      setReviews(prev => [newReview, ...prev]);
-      toast.success('Review submitted successfully!');
+      setReviewKey(prev => prev + 1);
     } catch (error) {
       console.error("Error submitting review:", error);
-      toast.error("Failed to submit review. Please try again.");
+      toast("Failed to submit review", {
+        description: "Please try again later",
+        variant: "destructive"
+      });
     }
   };
   
@@ -110,7 +120,6 @@ const ProductDetailPage = () => {
   
   return (
     <div className="container py-8">
-      {/* Breadcrumb Navigation */}
       <div className="mb-6">
         <Link 
           to="/products" 
@@ -122,7 +131,6 @@ const ProductDetailPage = () => {
       </div>
       
       <div className="grid md:grid-cols-2 gap-8 mb-12">
-        {/* Product Images */}
         <div>
           <div className="mb-4 aspect-square overflow-hidden rounded-lg bg-gray-100">
             <img 
@@ -151,7 +159,6 @@ const ProductDetailPage = () => {
           </div>
         </div>
         
-        {/* Product Info */}
         <div>
           <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
           
@@ -198,7 +205,6 @@ const ProductDetailPage = () => {
             </p>
           </div>
           
-          {/* Size Selection */}
           {product.sizes && product.sizes.length > 0 && (
             <div className="mb-6">
               <h3 className="text-sm font-medium mb-2">Size</h3>
@@ -220,7 +226,6 @@ const ProductDetailPage = () => {
             </div>
           )}
           
-          {/* Color Selection */}
           {product.colors && product.colors.length > 0 && (
             <div className="mb-6">
               <h3 className="text-sm font-medium mb-2">Color</h3>
@@ -248,7 +253,6 @@ const ProductDetailPage = () => {
             </div>
           )}
           
-          {/* Quantity */}
           <div className="mb-6">
             <h3 className="text-sm font-medium mb-2">Quantity</h3>
             <div className="flex items-center">
@@ -277,7 +281,6 @@ const ProductDetailPage = () => {
             </div>
           </div>
           
-          {/* Add to Cart Button */}
           <div className="flex flex-col sm:flex-row gap-3 mb-8">
             <Button 
               onClick={handleAddToCart}
@@ -303,7 +306,6 @@ const ProductDetailPage = () => {
             </Button>
           </div>
           
-          {/* Product Details Tabs */}
           <div className="border-b border-gray-200 mb-4">
             <div className="flex">
               <button
@@ -388,7 +390,7 @@ const ProductDetailPage = () => {
                       onClick={() => {
                         const comment = (document.getElementById('review-comment') as HTMLTextAreaElement).value;
                         const rating = parseInt((document.querySelector('[name="rating"]') as HTMLInputElement)?.value || "5");
-                        handleSubmitReview(rating, comment);
+                        handleAddReview({ rating, comment });
                         (document.getElementById('review-comment') as HTMLTextAreaElement).value = '';
                       }}
                       className="self-end"
@@ -448,7 +450,6 @@ const ProductDetailPage = () => {
         </div>
       </div>
       
-      {/* Related Products */}
       {relatedProducts.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Related Products</h2>

@@ -25,7 +25,9 @@ const CategoryPage = () => {
   const categoryBanners: Record<Category, string> = {
     men: 'https://images.unsplash.com/photo-1490114538077-0a7f8cb49891',
     women: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b',
-    accessories: 'https://images.unsplash.com/photo-1587467512961-120760940315'
+    accessories: 'https://images.unsplash.com/photo-1587467512961-120760940315',
+    electronics: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03',
+    home_kitchen: 'https://images.unsplash.com/photo-1556911220-bff31c812dba'
   };
   
   // Load products for category
