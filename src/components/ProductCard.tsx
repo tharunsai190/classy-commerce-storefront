@@ -14,12 +14,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   
   const handleAddToCart = () => {
-    addToCart({
-      product,
-      quantity: 1,
-      ...(product.sizes && { size: product.sizes[0] }),
-      ...(product.colors && { color: product.colors[0] })
-    });
+    addToCart(product, 1);
     
     toast(`${product.name} added to cart`, {
       description: "Item has been added to your cart"
@@ -29,11 +24,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <div className="group flex flex-col h-full bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
       <Link to={`/product/${product.id}`} className="relative h-60 w-full overflow-hidden">
-        <img
-          src={product.images[0]}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {product.images && product.images.length > 0 ? (
+          <img
+            src={product.images[0]}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-500">No image</span>
+          </div>
+        )}
         {product.stock < 5 && (
           <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
             Low Stock

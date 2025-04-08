@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
@@ -21,7 +22,9 @@ const CartPage = () => {
   
   const handleRemove = (productId: string, productName: string) => {
     removeFromCart(productId);
-    toast.success(`${productName} removed from cart`);
+    toast(`${productName} removed from cart`, {
+      description: "Item has been removed from your cart"
+    });
   };
   
   const handleApplyCoupon = () => {
@@ -41,7 +44,7 @@ const CartPage = () => {
     navigate('/checkout');
   };
 
-  if (cartItems.length === 0) {
+  if (!cartItems || cartItems.length === 0) {
     return (
       <div className="container py-16 text-center">
         <div className="mx-auto max-w-md">
@@ -84,11 +87,17 @@ const CartPage = () => {
                   <div className="col-span-12 md:col-span-6">
                     <div className="flex">
                       <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0">
-                        <img 
-                          src={item.product.images[0]} 
-                          alt={item.product.name}
-                          className="w-full h-full object-cover"
-                        />
+                        {item.product.images && item.product.images.length > 0 ? (
+                          <img 
+                            src={item.product.images[0]} 
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-500">No image</span>
+                          </div>
+                        )}
                       </div>
                       <div className="ml-4">
                         <Link 
