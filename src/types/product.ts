@@ -24,4 +24,4 @@ export interface CartItem {
   color?: string;
 }
 
-export type Category = 'men' | 'women' | 'accessories';
+export type Category = 'men' | 'women' | 'accessories' | 'electronics' | 'home_kitchen';
