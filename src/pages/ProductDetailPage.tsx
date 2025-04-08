@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -100,9 +101,8 @@ const ProductDetailPage = () => {
       setReviewKey(prev => prev + 1);
     } catch (error) {
       console.error("Error submitting review:", error);
-      toast("Failed to submit review", {
-        description: "Please try again later",
-        variant: "destructive"
+      toast.error("Failed to submit review", {
+        description: "Please try again later"
       });
     }
   };
