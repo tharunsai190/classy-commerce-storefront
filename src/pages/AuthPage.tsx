@@ -2,13 +2,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 type AuthMode = 'login' | 'register';
 
 const AuthPage = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const navigate = useNavigate();
+  const { login, register, isAuthenticated, user, logout } = useAuth();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -24,52 +25,97 @@ const AuthPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple form validation
     if (mode === 'register') {
       if (formData.password !== formData.confirmPassword) {
-        toast.error('Passwords do not match');
-        return;
+        return; // This will be handled by the register function
       }
-      
-      if (formData.password.length < 6) {
-        toast.error('Password must be at least 6 characters long');
-        return;
-      }
-      
-      if (!formData.firstName || !formData.lastName) {
-        toast.error('Please enter your full name');
-        return;
-      }
-    }
-    
-    if (!formData.email || !formData.password) {
-      toast.error('Email and password are required');
-      return;
     }
     
     setLoading(true);
     
-    // Simulate API request
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      let success;
       
       if (mode === 'login') {
-        toast.success('Login successful!');
+        success = await login(formData.email, formData.password);
       } else {
-        toast.success('Registration successful! You can now log in');
-        setMode('login');
+        success = await register(
+          formData.email,
+          formData.password,
+          formData.firstName,
+          formData.lastName
+        );
+        
+        if (success) {
+          setMode('login');
+          setFormData({
+            ...formData,
+            password: '',
+            confirmPassword: ''
+          });
+        }
       }
       
-      navigate('/');
-    }, 1500);
+      if (success && mode === 'login') {
+        navigate('/');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleLogout = () => {
+    logout();
   };
   
   const toggleMode = () => {
     setMode(mode === 'login' ? 'register' : 'login');
   };
+
+  // If user is already authenticated, show profile view instead
+  if (isAuthenticated && user) {
+    return (
+      <div className="container py-16">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-lg shadow-sm p-8">
+            <h1 className="text-2xl font-bold mb-6 text-center">My Account</h1>
+            
+            <div className="mb-6">
+              <div className="flex justify-center mb-4">
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl">
+                  {user.firstName[0]}{user.lastName[0]}
+                </div>
+              </div>
+              
+              <h2 className="text-xl font-semibold text-center mb-4">{user.firstName} {user.lastName}</h2>
+              <p className="text-gray-500 text-center mb-6">{user.email}</p>
+              
+              <div className="space-y-4">
+                <Button
+                  onClick={() => navigate('/orders')}
+                  variant="outline"
+                  className="w-full"
+                >
+                  View My Orders
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="destructive"
+                  className="w-full"
+                >
+                  Sign Out
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-16">
@@ -93,6 +139,7 @@ const AuthPage = () => {
                     value={formData.firstName}
                     onChange={handleChange}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                    required={mode === 'register'}
                   />
                 </div>
                 <div>
@@ -106,6 +153,7 @@ const AuthPage = () => {
                     value={formData.lastName}
                     onChange={handleChange}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                    required={mode === 'register'}
                   />
                 </div>
               </div>
@@ -122,6 +170,7 @@ const AuthPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                required
               />
             </div>
             
@@ -136,6 +185,7 @@ const AuthPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                required
               />
             </div>
             
@@ -151,6 +201,7 @@ const AuthPage = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                  required={mode === 'register'}
                 />
               </div>
             )}

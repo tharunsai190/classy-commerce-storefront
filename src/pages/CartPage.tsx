@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
@@ -39,11 +38,7 @@ const CartPage = () => {
   };
   
   const handleCheckout = () => {
-    // In a real app, this would navigate to the checkout process
-    // For now we'll just show a success message and clear the cart
-    toast.success('Order placed successfully!');
-    clearCart();
-    navigate('/');
+    navigate('/checkout');
   };
 
   if (cartItems.length === 0) {
