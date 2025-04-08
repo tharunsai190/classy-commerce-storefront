@@ -14,6 +14,7 @@ import ProductsPage from "@/pages/ProductsPage";
 import CategoryPage from "@/pages/CategoryPage";
 import CartPage from "@/pages/CartPage";
 import AuthPage from "@/pages/AuthPage";
+import OrdersPage from "@/pages/OrdersPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/category/:category" element={<CategoryPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/account" element={<AuthPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

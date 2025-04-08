@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, User, Search, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 
@@ -37,6 +37,9 @@ const Navbar = () => {
             <Link to="/category/accessories" className="text-gray-700 hover:text-primary transition-colors">
               Accessories
             </Link>
+            <Link to="/orders" className="text-gray-700 hover:text-primary transition-colors">
+              Orders
+            </Link>
           </div>
           
           {/* Search, User, Cart */}
@@ -58,6 +61,11 @@ const Navbar = () => {
                   {cartItemCount}
                 </span>
               )}
+            </Link>
+            <Link to="/orders" className="relative">
+              <Button variant="ghost" size="icon" className="text-gray-700">
+                <Package size={20} />
+              </Button>
             </Link>
           </div>
           
@@ -110,10 +118,22 @@ const Navbar = () => {
             >
               Accessories
             </Link>
+            <Link
+              to="/orders"
+              className="block py-2 text-gray-700 hover:text-primary transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Orders
+            </Link>
             <div className="flex space-x-3 pt-2">
               <Link to="/account" onClick={() => setIsMenuOpen(false)}>
                 <Button variant="ghost" size="icon" className="text-gray-700">
                   <User size={20} />
+                </Button>
+              </Link>
+              <Link to="/orders" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="ghost" size="icon" className="text-gray-700">
+                  <Package size={20} />
                 </Button>
               </Link>
               <Button variant="ghost" size="icon" className="text-gray-700">
