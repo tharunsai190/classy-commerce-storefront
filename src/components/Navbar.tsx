@@ -1,23 +1,20 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, Search, Menu, X, Package, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
-
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { cartItems } = useCart();
+  const {
+    cartItems
+  } = useCart();
   const navigate = useNavigate();
-  
   const cartItemCount = cartItems?.reduce((total, item) => total + item.quantity, 0) || 0;
-  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -25,7 +22,6 @@ const Navbar = () => {
       setSearchQuery('');
     }
   };
-  
   return <nav className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container py-4">
         <div className="flex items-center justify-between">
@@ -46,7 +42,7 @@ const Navbar = () => {
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid grid-cols-2 gap-3 p-4 w-[400px] bg-slate-950">
+                    <div className="grid grid-cols-2 gap-3 p-4 w-[400px] bg-slate-50">
                       <Link to="/category/men" className="flex items-center p-3 hover:bg-muted rounded-md">
                         <div className="text-sm font-medium">Men</div>
                       </Link>
