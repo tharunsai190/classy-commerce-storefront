@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ChevronDown, ChevronRight, Truck, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Package, ChevronDown, ChevronRight, Truck, Clock, CheckCircle, AlertCircle, Star } from 'lucide-react';
 import { 
   Table, 
   TableHeader, 
@@ -14,13 +14,24 @@ import { Button } from '@/components/ui/button';
 import { getUserOrders } from '@/data/orders';
 import { Order, OrderStatus } from '@/types/order';
 import { format } from 'date-fns';
+import { useAuth } from '@/context/AuthContext';
+import ReviewForm from '@/components/ReviewForm';
+import ReviewDisplay from '@/components/ReviewDisplay';
+import { submitProductReview } from '@/utils/dbUtils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const OrdersPage = () => {
+  const { user } = useAuth();
   // In a real app, you would get the user ID from authentication
-  const userId = "user-123";
+  const userId = user?.id || "user-123";
   const orders = getUserOrders(userId);
   
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
+  const [reviewingProduct, setReviewingProduct] = useState<{
+    orderId: string;
+    productId: string;
+  } | null>(null);
+  const [showReviews, setShowReviews] = useState<{[key: string]: boolean}>({});
   
   const toggleOrderDetails = (orderId: string) => {
     if (expandedOrders.includes(orderId)) {
@@ -28,6 +39,13 @@ const OrdersPage = () => {
     } else {
       setExpandedOrders([...expandedOrders, orderId]);
     }
+  };
+
+  const toggleProductReviews = (productId: string) => {
+    setShowReviews(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
   };
   
   const formatDate = (dateString: string) => {
@@ -67,6 +85,20 @@ const OrdersPage = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleSubmitReview = async ({ productId, rating, comment }: { productId: string; rating: number; comment: string }) => {
+    if (!user) return;
+    
+    await submitProductReview(
+      user.id,
+      `${user.firstName} ${user.lastName}`,
+      productId,
+      rating,
+      comment
+    );
+    
+    setReviewingProduct(null);
   };
 
   return (
@@ -159,32 +191,90 @@ const OrdersPage = () => {
                           <h5 className="font-medium mb-2">Items</h5>
                           <div className="space-y-3">
                             {order.items.map((item, idx) => (
-                              <div key={idx} className="flex items-center border-b border-gray-100 pb-2">
-                                <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                                  <img
-                                    src={item.product.images[0]}
-                                    alt={item.product.name}
-                                    className="h-full w-full object-cover object-center"
-                                  />
-                                </div>
-                                <div className="ml-4 flex-1">
-                                  <Link 
-                                    to={`/product/${item.product.id}`}
-                                    className="font-medium text-sm hover:text-primary"
-                                  >
-                                    {item.product.name}
-                                  </Link>
-                                  <div className="flex justify-between mt-1">
-                                    <div className="text-sm text-gray-500">
-                                      {item.size && <span className="mr-2">Size: {item.size}</span>}
-                                      {item.color && <span>Color: {item.color}</span>}
-                                      <span className="mx-2">Qty: {item.quantity}</span>
+                              <div key={idx} className="flex flex-col border-b border-gray-100 pb-3">
+                                <div className="flex items-center">
+                                  <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                                    <img
+                                      src={item.product.images[0]}
+                                      alt={item.product.name}
+                                      className="h-full w-full object-cover object-center"
+                                    />
+                                  </div>
+                                  <div className="ml-4 flex-1">
+                                    <Link 
+                                      to={`/product/${item.product.id}`}
+                                      className="font-medium text-sm hover:text-primary"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {item.product.name}
+                                    </Link>
+                                    <div className="flex justify-between mt-1">
+                                      <div className="text-sm text-gray-500">
+                                        {item.size && <span className="mr-2">Size: {item.size}</span>}
+                                        {item.color && <span>Color: {item.color}</span>}
+                                        <span className="mx-2">Qty: {item.quantity}</span>
+                                      </div>
+                                      <p className="text-sm font-medium">
+                                        ${((item.product.salePrice || item.product.price) * item.quantity).toFixed(2)}
+                                      </p>
                                     </div>
-                                    <p className="text-sm font-medium">
-                                      ${((item.product.salePrice || item.product.price) * item.quantity).toFixed(2)}
-                                    </p>
                                   </div>
                                 </div>
+
+                                {/* Review section */}
+                                {order.status === 'delivered' && (
+                                  <div className="ml-20 mt-2">
+                                    {reviewingProduct && 
+                                     reviewingProduct.orderId === order.id && 
+                                     reviewingProduct.productId === item.product.id ? (
+                                      <ReviewForm 
+                                        product={item.product} 
+                                        onSubmit={handleSubmitReview}
+                                        onCancel={() => setReviewingProduct(null)}
+                                      />
+                                    ) : (
+                                      <div className="flex space-x-2">
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm"
+                                          className="text-xs"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setReviewingProduct({
+                                              orderId: order.id,
+                                              productId: item.product.id
+                                            });
+                                          }}
+                                        >
+                                          <Star size={14} className="mr-1" />
+                                          Write a Review
+                                        </Button>
+
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm"
+                                          className="text-xs"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleProductReviews(item.product.id);
+                                          }}
+                                        >
+                                          {showReviews[item.product.id] ? 'Hide Reviews' : 'Show Reviews'}
+                                        </Button>
+                                      </div>
+                                    )}
+
+                                    <Collapsible
+                                      open={showReviews[item.product.id]}
+                                      onOpenChange={() => {}}
+                                      className="mt-2"
+                                    >
+                                      <CollapsibleContent>
+                                        <ReviewDisplay productId={item.product.id} className="mt-3 ml-2 border-t pt-3" />
+                                      </CollapsibleContent>
+                                    </Collapsible>
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -204,7 +294,7 @@ const OrdersPage = () => {
                                 size="sm"
                                 className="text-xs"
                               >
-                                Write a Review
+                                Report an Issue
                               </Button>
                             )}
                           </div>
@@ -220,13 +310,13 @@ const OrdersPage = () => {
       )}
       
       <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Connect to SQL Database</h2>
+        <h2 className="text-xl font-bold mb-4">Database Connection</h2>
         <div className="bg-white p-5 rounded-lg border">
-          <p className="mb-4">In a production application, you would connect to your SQL database to fetch real order data. Here's how you would implement it:</p>
+          <p className="mb-4">In a production application, you would connect to your SQL database to fetch and store reviews data. Here's how to implement it:</p>
           
           <div className="bg-gray-50 p-4 rounded-md mb-4">
             <pre className="text-sm overflow-x-auto">
-              {`// Using a database connection library like mysql or pg
+              {`// Using a database connection library like mysql2
 import mysql from 'mysql2/promise';
 
 // Create a connection pool
@@ -237,39 +327,48 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME
 });
 
-// Function to fetch user orders
-export async function fetchUserOrders(userId: string) {
+// Function to fetch product reviews
+export async function fetchProductReviews(productId) {
   try {
     const connection = await pool.getConnection();
     
-    // Query to get orders with their items
-    const [orders] = await connection.query(
-      \`SELECT o.id, o.created_at, o.status, o.total_amount, 
-        o.payment_method, o.tracking_number,
-        a.full_name, a.street, a.city, a.state, a.zip_code, a.country
-      FROM orders o
-      JOIN addresses a ON o.shipping_address_id = a.id
-      WHERE o.user_id = ?
-      ORDER BY o.created_at DESC\`,
-      [userId]
+    const [rows] = await connection.query(
+      \`SELECT r.id, r.product_id, r.user_id, r.user_name,
+        r.rating, r.comment, r.created_at
+      FROM reviews r
+      WHERE r.product_id = ?
+      ORDER BY r.created_at DESC\`,
+      [productId]
     );
     
-    // For each order, get its items
-    for (const order of orders) {
-      const [items] = await connection.query(
-        \`SELECT oi.quantity, oi.size, oi.color,
-          p.id, p.name, p.price, p.sale_price, p.images
-        FROM order_items oi
-        JOIN products p ON oi.product_id = p.id
-        WHERE oi.order_id = ?\`,
-        [order.id]
-      );
-      
-      order.items = items;
-    }
+    connection.release();
+    return rows;
+  } catch (error) {
+    console.error('Database error:', error);
+    throw error;
+  }
+}
+
+// Function to submit a new review
+export async function submitReview(userId, userName, productId, rating, comment) {
+  try {
+    const connection = await pool.getConnection();
+    
+    const reviewId = generateUniqueId(); // Your ID generation function
+    
+    await connection.query(
+      \`INSERT INTO reviews (id, product_id, user_id, user_name, rating, comment)
+      VALUES (?, ?, ?, ?, ?, ?)\`,
+      [reviewId, productId, userId, userName, rating, comment]
+    );
+    
+    const [newReview] = await connection.query(
+      'SELECT * FROM reviews WHERE id = ?',
+      [reviewId]
+    );
     
     connection.release();
-    return orders;
+    return newReview[0];
   } catch (error) {
     console.error('Database error:', error);
     throw error;
@@ -279,8 +378,9 @@ export async function fetchUserOrders(userId: string) {
           </div>
           
           <p className="text-sm text-gray-500">
-            Note: To implement this in your application, you would need to set up a backend server 
-            with appropriate database connection credentials and environment variables.
+            Note: To implement this, you would need to set up a MySQL database with a "reviews" table and
+            connect it using appropriate environment variables. Currently, the app is using mock data, but
+            you can replace the functions in dbUtils.ts with real database queries.
           </p>
         </div>
       </div>
