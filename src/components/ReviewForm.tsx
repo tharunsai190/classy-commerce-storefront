@@ -7,12 +7,13 @@ import { Product } from '@/types/product';
 import { toast } from 'sonner';
 
 interface ReviewFormProps {
-  product: Product;
-  onSubmit: (review: { productId: string; rating: number; comment: string }) => Promise<void>;
-  onCancel: () => void;
+  product?: Product;
+  onSubmit?: (review: { productId: string; rating: number; comment: string }) => Promise<void>;
+  onCancel?: () => void;
+  onSubmitReview?: (rating: number, comment: string) => void;
 }
 
-const ReviewForm = ({ product, onSubmit, onCancel }: ReviewFormProps) => {
+const ReviewForm = ({ product, onSubmit, onCancel, onSubmitReview }: ReviewFormProps) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,12 +27,21 @@ const ReviewForm = ({ product, onSubmit, onCancel }: ReviewFormProps) => {
 
     try {
       setIsSubmitting(true);
-      await onSubmit({
-        productId: product.id,
-        rating,
-        comment
-      });
+      
+      if (onSubmitReview) {
+        onSubmitReview(rating, comment);
+      } else if (product && onSubmit) {
+        await onSubmit({
+          productId: product.id,
+          rating,
+          comment
+        });
+      }
+      
       toast.success('Review submitted successfully');
+      // Reset form
+      setRating(0);
+      setComment('');
     } catch (error) {
       console.error('Error submitting review:', error);
       toast.error('Failed to submit review. Please try again.');
@@ -42,7 +52,9 @@ const ReviewForm = ({ product, onSubmit, onCancel }: ReviewFormProps) => {
 
   return (
     <div className="bg-white p-4 rounded-md border border-gray-200 mt-4">
-      <h4 className="font-medium text-lg mb-3">Write a Review for {product.name}</h4>
+      <h4 className="font-medium text-lg mb-3">
+        Write a Review {product ? `for ${product.name}` : ''}
+      </h4>
       
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -79,9 +91,11 @@ const ReviewForm = ({ product, onSubmit, onCancel }: ReviewFormProps) => {
         </div>
 
         <div className="flex gap-2 justify-end">
-          <Button variant="outline" onClick={onCancel} type="button" disabled={isSubmitting}>
-            Cancel
-          </Button>
+          {onCancel && (
+            <Button variant="outline" onClick={onCancel} type="button" disabled={isSubmitting}>
+              Cancel
+            </Button>
+          )}
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Submitting..." : "Submit Review"}
           </Button>

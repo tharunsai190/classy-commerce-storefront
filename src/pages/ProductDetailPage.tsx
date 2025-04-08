@@ -12,7 +12,7 @@ import ReviewDisplay from '@/components/ReviewDisplay';
 import ReviewForm from '@/components/ReviewForm';
 import { Review } from '@/types/review';
 import { useAuth } from '@/context/AuthContext';
-import { getProductReviews, addReview } from '@/utils/dbUtils';
+import { getProductReviews, submitProductReview } from '@/utils/dbUtils';
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,8 +42,15 @@ const ProductDetailPage = () => {
         setRelatedProducts(related);
         
         // Get reviews
-        const productReviews = getProductReviews(id);
-        setReviews(productReviews);
+        const fetchReviews = async () => {
+          try {
+            const productReviews = await getProductReviews(id);
+            setReviews(productReviews);
+          } catch (error) {
+            console.error("Error fetching reviews:", error);
+          }
+        };
+        fetchReviews();
       }
     }
   }, [id]);
@@ -70,22 +77,24 @@ const ProductDetailPage = () => {
     toast.success(`${product.name} added to cart`);
   };
   
-  const handleSubmitReview = (rating: number, comment: string) => {
+  const handleSubmitReview = async (rating: number, comment: string) => {
     if (!product || !isAuthenticated || !user) return;
     
-    const newReview: Review = {
-      id: `review-${Date.now()}`,
-      productId: product.id,
-      userId: user.id,
-      userName: `${user.firstName} ${user.lastName}`,
-      rating,
-      comment,
-      createdAt: new Date().toISOString()
-    };
-    
-    addReview(newReview);
-    setReviews(prev => [newReview, ...prev]);
-    toast.success('Review submitted successfully!');
+    try {
+      const newReview = await submitProductReview(
+        user.id,
+        `${user.firstName} ${user.lastName}`,
+        product.id,
+        rating,
+        comment
+      );
+      
+      setReviews(prev => [newReview, ...prev]);
+      toast.success('Review submitted successfully!');
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast.error("Failed to submit review. Please try again.");
+    }
   };
   
   if (!product) {
@@ -338,7 +347,59 @@ const ProductDetailPage = () => {
           {activeTab === 'reviews' && (
             <div>
               {isAuthenticated ? (
-                <ReviewForm onSubmitReview={handleSubmitReview} />
+                <div className="mb-6">
+                  <h3 className="font-medium mb-2">Write a Review</h3>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      {[...Array(5)].map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          className="focus:outline-none"
+                          onClick={() => {
+                            const ratingForm = document.getElementById('review-form') as HTMLFormElement;
+                            const ratingInput = ratingForm?.querySelector('[name="rating"]') as HTMLInputElement;
+                            if (ratingInput) ratingInput.value = String(i + 1);
+                          }}
+                        >
+                          <svg
+                            className="w-5 h-5 text-yellow-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                            />
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      className="w-full border border-gray-300 rounded-md p-2"
+                      rows={3}
+                      placeholder="Write your review here..."
+                      id="review-comment"
+                    ></textarea>
+                    <Button 
+                      onClick={() => {
+                        const comment = (document.getElementById('review-comment') as HTMLTextAreaElement).value;
+                        const rating = parseInt((document.querySelector('[name="rating"]') as HTMLInputElement)?.value || "5");
+                        handleSubmitReview(rating, comment);
+                        (document.getElementById('review-comment') as HTMLTextAreaElement).value = '';
+                      }}
+                      className="self-end"
+                    >
+                      Submit Review
+                    </Button>
+                    <form id="review-form" className="hidden">
+                      <input type="hidden" name="rating" value="5" />
+                    </form>
+                  </div>
+                </div>
               ) : (
                 <div className="bg-gray-50 p-4 rounded-md mb-6">
                   <p className="text-gray-600 text-sm">
@@ -354,7 +415,29 @@ const ProductDetailPage = () => {
               <div className="space-y-6">
                 {reviews.length > 0 ? (
                   reviews.map(review => (
-                    <ReviewDisplay key={review.id} review={review} />
+                    <div key={review.id} className="border-b pb-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">{review.userName}</h4>
+                        <span className="text-sm text-gray-500">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center my-1">
+                        {[...Array(5)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <p className="text-gray-600 mt-1">{review.comment}</p>
+                    </div>
                   ))
                 ) : (
                   <p className="text-gray-500">No reviews yet.</p>

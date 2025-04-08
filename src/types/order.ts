@@ -23,6 +23,10 @@ export interface Order {
   createdAt: string;
   estimatedDelivery?: string; // Add estimated delivery date
   trackingId?: string;
+  shippingAddress?: Address; // For backward compatibility
+  status?: string; // For backward compatibility
+  trackingNumber?: string; // For backward compatibility
+  updatedAt?: string; // For backward compatibility
 }
 
 export interface OrderItem {
@@ -34,3 +38,5 @@ export interface OrderItem {
   color?: string;
   image: string;
 }
+
+export type OrderStatus = 'processing' | 'shipped' | 'delivered' | 'cancelled'; // For backward compatibility

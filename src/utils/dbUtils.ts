@@ -75,6 +75,9 @@ export const submitProductReview = async (
   }
 };
 
+// Export submitProductReview as addReview for backward compatibility
+export const addReview = submitProductReview;
+
 // Function to get all reviews for a user
 export const getUserReviews = async (userId: string): Promise<Review[]> => {
   try {
