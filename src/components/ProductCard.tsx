@@ -28,11 +28,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className="product-card group">
+    <div className="product-card group border border-gray-200 rounded-md">
       <div className="relative overflow-hidden">
         {/* Product image with hover effect */}
         <Link to={`/product/${product.id}`}>
-          <div className="aspect-[3/4] overflow-hidden">
+          <div className="aspect-square overflow-hidden">
             <img
               src={product.images[0]}
               alt={product.name}
@@ -53,31 +53,31 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Button
             variant="ghost"
             size="icon"
-            className={`bg-white rounded-full shadow-sm hover:bg-gray-100 ${
+            className={`bg-white rounded-full shadow-sm w-7 h-7 p-1 hover:bg-gray-100 ${
               isWishlisted ? 'text-red-500' : 'text-gray-600'
             }`}
             onClick={toggleWishlist}
           >
-            <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
+            <Heart size={16} fill={isWishlisted ? 'currentColor' : 'none'} />
           </Button>
         </div>
         
         {/* Quick add to cart button (appears on hover) */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white bg-opacity-95 py-2 px-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+        <div className="absolute bottom-0 left-0 right-0 bg-white bg-opacity-95 py-1.5 px-2 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
           <Button 
             onClick={handleAddToCart} 
-            className="w-full bg-primary hover:bg-primary/90 text-white flex items-center justify-center gap-2 text-sm"
+            className="w-full bg-primary hover:bg-primary/90 text-white flex items-center justify-center gap-1 text-xs py-1"
           >
-            <ShoppingCart size={16} />
+            <ShoppingCart size={14} />
             Add to Cart
           </Button>
         </div>
       </div>
       
       {/* Product info */}
-      <div className="p-4">
+      <div className="p-3">
         <Link to={`/product/${product.id}`}>
-          <h3 className="font-medium text-gray-900 mb-1 hover:text-primary transition-colors">
+          <h3 className="font-medium text-sm text-gray-900 mb-1 hover:text-primary transition-colors truncate">
             {product.name}
           </h3>
         </Link>
@@ -85,14 +85,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <div>
             {product.salePrice ? (
               <div className="flex items-center gap-2">
-                <span className="font-semibold">${product.salePrice.toFixed(2)}</span>
-                <span className="text-gray-500 text-sm line-through">${product.price.toFixed(2)}</span>
+                <span className="font-semibold text-sm">${product.salePrice.toFixed(2)}</span>
+                <span className="text-gray-500 text-xs line-through">${product.price.toFixed(2)}</span>
               </div>
             ) : (
-              <span className="font-semibold">${product.price.toFixed(2)}</span>
+              <span className="font-semibold text-sm">${product.price.toFixed(2)}</span>
             )}
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-xs text-gray-500">
             {product.rating > 0 && (
               <div className="flex items-center">
                 <span className="mr-1">{product.rating}</span>
