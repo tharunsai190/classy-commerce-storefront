@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { PaymentMethod, Address } from '@/types/order';
+import { PaymentMethod, Address, Order, OrderStatus } from '@/types/order';
 import { formatPriceINR } from '@/data/products';
 import { IndianRupee, Lock, Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
