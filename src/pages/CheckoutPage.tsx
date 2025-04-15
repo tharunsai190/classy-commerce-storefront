@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -9,8 +8,9 @@ import { PaymentMethod, Address } from '@/types/order';
 import { formatPriceINR } from '@/data/products';
 import { IndianRupee, Lock, Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { addOrder } from '@/data/orders';
+import { v4 as uuidv4 } from 'uuid';
 
-// Payment options for India
 const paymentOptions = [
   { id: 'credit_card', name: 'Credit/Debit Card', icon: '💳' },
   { id: 'upi', name: 'UPI Payment (PhonePe, Google Pay, etc.)', icon: '📱' },
@@ -18,7 +18,6 @@ const paymentOptions = [
   { id: 'cod', name: 'Cash on Delivery', icon: '💸' }
 ];
 
-// Calculate random delivery date between 3-7 days from now
 const getEstimatedDeliveryDate = () => {
   const today = new Date();
   const deliveryDays = Math.floor(Math.random() * 5) + 3; // 3-7 days
@@ -39,27 +38,24 @@ const CheckoutPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeStep, setActiveStep] = useState<'address' | 'payment'>('address');
   const [estimatedDelivery, setEstimatedDelivery] = useState('');
-  
+
   useEffect(() => {
     setEstimatedDelivery(getEstimatedDeliveryDate());
   }, []);
-  
-  // Check if user is authenticated
+
   useEffect(() => {
     if (!isAuthenticated) {
       toast.error('Please sign in to continue checkout');
       navigate('/account');
     }
   }, [isAuthenticated, navigate]);
-  
-  // Redirect if cart is empty
+
   useEffect(() => {
     if (cartItems.length === 0) {
       navigate('/cart');
     }
   }, [cartItems, navigate]);
-  
-  // Form state with user data pre-filled if available
+
   const [formData, setFormData] = useState<{
     fullName: string;
     email: string;
@@ -84,22 +80,18 @@ const CheckoutPage = () => {
     saveInfo: false
   });
 
-  // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
     
     if (name.includes('.')) {
-      // Handle nested address object
-      const [parent, child] = name.split('.');
       setFormData({
         ...formData,
-        [parent]: {
-          ...formData[parent as keyof typeof formData] as object,
-          [child]: value
+        [name.split('.')[0]]: {
+          ...formData[name.split('.')[0]] as object,
+          [name.split('.')[1]]: value
         }
       });
     } else {
-      // Handle regular input
       setFormData({
         ...formData,
         [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -107,16 +99,13 @@ const CheckoutPage = () => {
     }
   };
 
-  // Shipping calculation
-  const shipping = cartTotal > 500 ? 0 : 70; // Free shipping over ₹500
-  const tax = cartTotal * 0.18; // 18% GST
+  const shipping = cartTotal > 500 ? 0 : 70;
+  const tax = cartTotal * 0.18;
   const orderTotal = cartTotal + shipping + tax;
 
-  // Step control
   const goToPayment = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation for address
     if (!formData.fullName || !formData.email || !formData.phone || 
         !formData.address.street || !formData.address.city || 
         !formData.address.state || !formData.address.zipCode) {
@@ -124,14 +113,12 @@ const CheckoutPage = () => {
       return;
     }
     
-    // Validate phone number (basic Indian format validation)
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneRegex.test(formData.phone)) {
       toast.error('Please enter a valid 10-digit mobile number');
       return;
     }
     
-    // Set mobile number same as phone
     setFormData(prev => ({
       ...prev,
       address: {
@@ -143,23 +130,44 @@ const CheckoutPage = () => {
     setActiveStep('payment');
   };
 
-  // Submit order handler
   const handleSubmitOrder = (e: React.FormEvent) => {
     e.preventDefault();
     
     setIsProcessing(true);
 
-    // Simulate API call to create order and process payment
+    const newOrder: Order = {
+      id: `ORD-${uuidv4().substring(0, 8)}`,
+      userId: user?.id || 'user-123',
+      items: cartItems.map(item => ({
+        productId: item.product.id,
+        productName: item.product.name,
+        price: item.product.salePrice || item.product.price,
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color,
+        image: item.product.images[0]
+      })),
+      totalAmount: orderTotal,
+      status: 'pending' as OrderStatus,
+      paymentMethod: formData.paymentMethod,
+      paymentStatus: 'pending',
+      orderStatus: 'processing',
+      shippingAddress: formData.address,
+      address: formData.address,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    addOrder(newOrder);
+
     setTimeout(() => {
       setIsProcessing(false);
-      // In a real application, this is where you would send the order to the server
       toast.success('Order placed successfully!');
       clearCart();
       navigate('/orders');
     }, 1500);
   };
 
-  // If not authenticated or cart is empty, show nothing (will redirect)
   if (!isAuthenticated || cartItems.length === 0) {
     return null;
   }
@@ -169,11 +177,9 @@ const CheckoutPage = () => {
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
       
       <div className="grid md:grid-cols-3 gap-8">
-        {/* Checkout Form (Left Column) */}
         <div className="md:col-span-2">
           {activeStep === 'address' ? (
             <form onSubmit={goToPayment}>
-              {/* Shipping Information */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
                   <MapPin size={20} className="mr-2 text-primary" />
@@ -297,7 +303,6 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              {/* Delivery Information */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
                   <Clock size={20} className="mr-2 text-primary" />
@@ -322,7 +327,6 @@ const CheckoutPage = () => {
             </form>
           ) : (
             <form onSubmit={handleSubmitOrder}>
-              {/* Payment Method */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
                   <Lock size={20} className="mr-2 text-primary" />
@@ -347,7 +351,6 @@ const CheckoutPage = () => {
                     </div>
                   ))}
                   
-                  {/* Conditional content based on payment method */}
                   {formData.paymentMethod === 'credit_card' && (
                     <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50">
                       <p className="text-sm text-gray-500 mb-2">
@@ -431,7 +434,6 @@ const CheckoutPage = () => {
                 </div>
               </div>
               
-              {/* Shipping Address Review */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="font-semibold">Shipping Address</h3>
@@ -480,12 +482,10 @@ const CheckoutPage = () => {
           )}
         </div>
         
-        {/* Order Summary (Right Column) */}
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow-sm p-6 sticky top-20">
             <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
             
-            {/* Order Items */}
             <div className="max-h-60 overflow-y-auto mb-4">
               {cartItems.map(item => (
                 <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex py-2 border-b last:border-b-0">
@@ -514,7 +514,6 @@ const CheckoutPage = () => {
               ))}
             </div>
             
-            {/* Coupon Code */}
             <div className="mb-4">
               <Accordion type="single" collapsible>
                 <AccordionItem value="coupon">
@@ -533,7 +532,6 @@ const CheckoutPage = () => {
               </Accordion>
             </div>
             
-            {/* Order Details */}
             <div className="space-y-3 text-sm border-t pt-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
@@ -565,13 +563,11 @@ const CheckoutPage = () => {
               </div>
             </div>
             
-            {/* Payment Secure Message */}
             <div className="mt-6 flex items-center justify-center text-xs text-gray-500">
               <Lock size={12} className="mr-1" />
               All transactions are secure and encrypted
             </div>
             
-            {/* Payment Methods */}
             <div className="mt-4">
               <p className="text-xs text-gray-500 text-center mb-2">We Accept</p>
               <div className="flex justify-center space-x-2">

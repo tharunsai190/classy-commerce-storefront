@@ -1,9 +1,8 @@
-
 import { Order, OrderItem, OrderStatus } from "@/types/order";
 import { products } from "./products";
 
 // Mock orders data
-export const orders: Order[] = [
+let orders: Order[] = [
   {
     id: "ORD-1001",
     userId: "user-123",
@@ -186,9 +185,14 @@ export const orders: Order[] = [
 ];
 
 export const getUserOrders = (userId: string): Order[] => {
-  return orders.filter(order => order.userId === userId);
+    return orders.filter(order => order.userId === userId);
 };
 
 export const getOrderById = (orderId: string): Order | undefined => {
-  return orders.find(order => order.id === orderId);
+    return orders.find(order => order.id === orderId);
+};
+
+export const addOrder = (newOrder: Order) => {
+    orders = [newOrder, ...orders];
+    return newOrder;
 };
