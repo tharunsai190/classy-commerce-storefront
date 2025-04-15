@@ -62,8 +62,8 @@ export const products: Product[] = [
     description: "Stylish and functional crossbody bag made from genuine leather. Features multiple compartments and adjustable strap.",
     price: 89.99,
     images: [
-      "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1584917865442-de89df41a097?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80",
+      "https://images.unsplash.com/photo-1594223274512-ad4803739b7c",
+      "https://images.unsplash.com/photo-1584917865442-de89df41a097"
     ],
     category: "accessories",
     tags: ["bag", "leather", "accessories"],
@@ -414,7 +414,7 @@ export const products: Product[] = [
     stock: 12,
     sizes: ["38", "40", "42", "44", "46"],
     colors: ["Navy", "Black", "Gray"],
-    featured: true
+    featured: true,
   },
   {
     id: "26",
