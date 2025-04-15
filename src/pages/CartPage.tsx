@@ -12,9 +12,10 @@ const CartPage = () => {
   const [couponCode, setCouponCode] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   
+  // Ensure all calculations use valid numbers with default values
   const shipping = cartTotal > 50 ? 0 : 5.99;
   const tax = cartTotal * 0.07;
-  const orderTotal = cartTotal + shipping + tax;
+  const orderTotal = (cartTotal || 0) + (shipping || 0) + (tax || 0);
   
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     updateQuantity(productId, newQuantity);
@@ -124,7 +125,7 @@ const CartPage = () => {
                   <div className="col-span-3 md:col-span-2 text-center">
                     <div className="md:hidden text-sm text-gray-500 mb-1">Price:</div>
                     <div>
-                      ${(item.product.salePrice || item.product.price).toFixed(2)}
+                      ${((item.product.salePrice || item.product.price) || 0).toFixed(2)}
                     </div>
                   </div>
                   
@@ -154,7 +155,7 @@ const CartPage = () => {
                   <div className="col-span-4 md:col-span-2 text-right">
                     <div className="md:hidden text-sm text-gray-500 mb-1">Total:</div>
                     <div className="font-medium">
-                      ${((item.product.salePrice || item.product.price) * item.quantity).toFixed(2)}
+                      ${(((item.product.salePrice || item.product.price) || 0) * item.quantity).toFixed(2)}
                     </div>
                     <button
                       onClick={() => handleRemove(item.product.id, item.product.name)}
@@ -211,7 +212,7 @@ const CartPage = () => {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>${(cartTotal || 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>
@@ -219,12 +220,12 @@ const CartPage = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax</span>
-                <span>${tax.toFixed(2)}</span>
+                <span>${(tax || 0).toFixed(2)}</span>
               </div>
               <div className="border-t pt-3 mt-3">
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total</span>
-                  <span>${orderTotal.toFixed(2)}</span>
+                  <span>${(orderTotal || 0).toFixed(2)}</span>
                 </div>
               </div>
             </div>
