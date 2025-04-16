@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
-import { getProductsByCategory } from '@/data/products';
+import { getProductsByCategory } from '@/data/products/index';
 import { Category, Product } from '@/types/product';
 import { Filter, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';

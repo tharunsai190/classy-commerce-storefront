@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { Product } from '@/types/product';
 import ProductCard from '@/components/ProductCard';
-import { getProductsByCategory } from '@/data/products';
+import { getProductsByCategory } from '@/data/products/index';
 
 const HomeKitchenPage = () => {
   const [products, setProducts] = useState<Product[]>([]);

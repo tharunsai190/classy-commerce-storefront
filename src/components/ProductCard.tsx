@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
-import { formatPriceINR } from '@/data/products';
+import { formatPriceINR } from '@/data/products/index';
 import { toast } from 'sonner';
 import { useState } from 'react';
 

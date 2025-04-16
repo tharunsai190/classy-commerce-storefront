@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, SlidersHorizontal, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { Product } from '@/types/product';
-import { products } from '@/data/products';
+import { products } from '@/data/products/index';
 
 const sortOptions = [
   { label: 'Featured', value: 'featured' },
@@ -21,29 +20,24 @@ const ProductsPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   
-  // Get filters from URL
   const categoryParam = searchParams.get('category') || '';
   const searchParam = searchParams.get('search') || '';
   const sortParam = searchParams.get('sort') || 'featured';
   const minPriceParam = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0;
   const maxPriceParam = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 1000;
   
-  // Local filter state
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categoryParam ? categoryParam.split(',') : []
   );
   const [priceRange, setPriceRange] = useState<[number, number]>([minPriceParam, maxPriceParam]);
-
-  // Extract unique categories and tags from products
+  
   const categories = Array.from(new Set(products.map(p => p.category)));
   const tags = Array.from(new Set(products.flatMap(p => p.tags)));
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
-  // Filter and sort products
   useEffect(() => {
     let filtered = [...products];
     
-    // Filter by search
     if (searchParam) {
       const searchLower = searchParam.toLowerCase();
       filtered = filtered.filter(
@@ -54,24 +48,20 @@ const ProductsPage = () => {
       );
     }
     
-    // Filter by category
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(p => selectedCategories.includes(p.category));
     }
     
-    // Filter by price range
     filtered = filtered.filter(
       p => (p.salePrice || p.price) >= priceRange[0] && (p.salePrice || p.price) <= priceRange[1]
     );
     
-    // Filter by tags
     if (selectedTags.length > 0) {
       filtered = filtered.filter(p => 
         p.tags.some(tag => selectedTags.includes(tag))
       );
     }
     
-    // Sort products
     switch (sortParam) {
       case 'price-asc':
         filtered.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price));
@@ -83,18 +73,15 @@ const ProductsPage = () => {
         filtered.sort((a, b) => b.rating - a.rating);
         break;
       case 'newest':
-        // In a real app this would sort by date, but we're using mock data
         filtered = filtered.filter(p => p.newArrival).concat(filtered.filter(p => !p.newArrival));
         break;
       default:
-        // Featured sorting
         filtered = filtered.filter(p => p.featured).concat(filtered.filter(p => !p.featured));
     }
     
     setFilteredProducts(filtered);
   }, [searchParam, selectedCategories, sortParam, priceRange, selectedTags]);
   
-  // Update URL when filters change
   const updateFilters = () => {
     const params: Record<string, string> = {};
     
@@ -120,7 +107,6 @@ const ProductsPage = () => {
     
     setSearchParams(params);
     
-    // Close filter sidebar on mobile after applying
     if (window.innerWidth < 768) {
       setIsFilterOpen(false);
     }
@@ -160,7 +146,6 @@ const ProductsPage = () => {
       <h1 className="text-3xl font-bold mb-8">All Products</h1>
       
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Mobile Filter Toggle */}
         <div className="md:hidden">
           <Button 
             onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -172,7 +157,6 @@ const ProductsPage = () => {
           </Button>
         </div>
         
-        {/* Sidebar Filters (mobile and desktop) */}
         <aside 
           className={`w-full md:w-64 flex-shrink-0 ${isFilterOpen ? 'block' : 'hidden md:block'}`}
         >
@@ -192,7 +176,6 @@ const ProductsPage = () => {
               </Button>
             </div>
             
-            {/* Categories */}
             <div className="mb-6">
               <h3 className="font-medium mb-3">Categories</h3>
               <div className="space-y-2">
@@ -210,7 +193,6 @@ const ProductsPage = () => {
               </div>
             </div>
             
-            {/* Price Range */}
             <div className="mb-6">
               <h3 className="font-medium mb-3">Price Range</h3>
               <div className="flex items-center space-x-3">
@@ -236,7 +218,6 @@ const ProductsPage = () => {
               </div>
             </div>
             
-            {/* Popular Tags */}
             <div className="mb-6">
               <h3 className="font-medium mb-3">Popular Tags</h3>
               <div className="flex flex-wrap gap-2">
@@ -265,15 +246,12 @@ const ProductsPage = () => {
           </div>
         </aside>
         
-        {/* Products Section */}
         <div className="flex-grow">
-          {/* Filter results info and sorting */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
             <p className="text-gray-600 mb-4 sm:mb-0">
               Showing <span className="font-medium">{filteredProducts.length}</span> results
             </p>
             
-            {/* Sort Dropdown */}
             <div className="relative">
               <Button
                 variant="outline"
@@ -304,7 +282,6 @@ const ProductsPage = () => {
             </div>
           </div>
           
-          {/* Product Grid */}
           {filteredProducts.length > 0 ? (
             <div className="product-grid">
               {filteredProducts.map(product => (

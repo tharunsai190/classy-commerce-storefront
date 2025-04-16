@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { Product } from '@/types/product';
 import ProductCard from '@/components/ProductCard';
-import { products } from '@/data/products';
+import { products } from '@/data/products/index';
 
 const DealsPage = () => {
   const [dealsProducts, setDealsProducts] = useState<Product[]>([]);
