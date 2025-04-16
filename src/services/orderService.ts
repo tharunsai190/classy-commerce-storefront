@@ -1,13 +1,20 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Order, OrderItem } from '@/types/order';
+import { v4 as uuidv4 } from 'uuid';
 
 export const createOrder = async (order: Order) => {
+  // Generate a UUID for user_id if it's not in proper UUID format
+  let userId = order.userId;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+    userId = uuidv4(); // Generate a valid UUID
+  }
+
   // Convert the address to JSON format for storage
   const { data: newOrder, error: orderError } = await supabase
     .from('orders')
     .insert({
-      user_id: order.userId,
+      user_id: userId,
       total_amount: order.totalAmount,
       payment_method: order.paymentMethod,
       payment_status: order.paymentStatus,
