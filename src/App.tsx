@@ -23,41 +23,39 @@ import HomeKitchenPage from "@/pages/HomeKitchenPage";
 import DealsPage from "@/pages/DealsPage";
 import NotFound from "@/pages/NotFound";
 
-// Create a new QueryClient instance explicitly
+// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <AuthProvider>
-            <CartProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Layout>
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/products" element={<ProductsPage />} />
-                    <Route path="/product/:id" element={<ProductDetailPage />} />
-                    <Route path="/category/:category" element={<CategoryPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                    <Route path="/checkout" element={<CheckoutPage />} />
-                    <Route path="/account" element={<AuthPage />} />
-                    <Route path="/orders" element={<OrdersPage />} />
-                    <Route path="/electronics" element={<ElectronicsPage />} />
-                    <Route path="/home-kitchen" element={<HomeKitchenPage />} />
-                    <Route path="/deals" element={<DealsPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Layout>
-              </BrowserRouter>
-            </CartProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/product/:id" element={<ProductDetailPage />} />
+                  <Route path="/category/:category" element={<CategoryPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/account" element={<AuthPage />} />
+                  <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/electronics" element={<ElectronicsPage />} />
+                  <Route path="/home-kitchen" element={<HomeKitchenPage />} />
+                  <Route path="/deals" element={<DealsPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+            </BrowserRouter>
+          </CartProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 

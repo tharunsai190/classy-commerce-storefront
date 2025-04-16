@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Order, OrderItem } from '@/types/order';
 
 export const createOrder = async (order: Order) => {
+  // Convert the address to JSON format for storage
   const { data: newOrder, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -11,7 +12,7 @@ export const createOrder = async (order: Order) => {
       payment_method: order.paymentMethod,
       payment_status: order.paymentStatus,
       order_status: order.orderStatus,
-      shipping_address: order.shippingAddress,
+      shipping_address: order.shippingAddress as any,
       tracking_id: order.trackingNumber,
       estimated_delivery: order.estimatedDelivery
     })

@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Order } from '@/types/order';
+import { Order, OrderItem, PaymentMethod, OrderStatus, Address } from '@/types/order';
 
 export const useOrders = (userId: string) => {
   return useQuery({
@@ -13,6 +13,7 @@ export const useOrders = (userId: string) => {
           *,
           items:order_items(*)
         `)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -21,15 +22,16 @@ export const useOrders = (userId: string) => {
         id: order.id,
         userId: order.user_id,
         totalAmount: order.total_amount,
-        paymentMethod: order.payment_method,
-        paymentStatus: order.payment_status,
-        orderStatus: order.order_status,
-        shippingAddress: order.shipping_address,
+        paymentMethod: order.payment_method as PaymentMethod,
+        paymentStatus: order.payment_status as 'pending' | 'paid' | 'failed',
+        orderStatus: order.order_status as 'processing' | 'shipped' | 'delivered' | 'cancelled',
+        shippingAddress: order.shipping_address as unknown as Address,
         createdAt: order.created_at,
-        status: order.order_status,
+        status: order.order_status as OrderStatus,
         trackingNumber: order.tracking_id,
         updatedAt: order.updated_at,
         estimatedDelivery: order.estimated_delivery,
+        address: order.shipping_address as unknown as Address,
         items: order.items.map(item => ({
           productId: item.product_id,
           productName: item.product_name,
