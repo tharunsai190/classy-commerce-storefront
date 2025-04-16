@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Product } from '@/types/product';
 import ProductCard from '@/components/ProductCard';
-import { getProductsOnSale } from '@/data/products/index';
+import { getProductsOnSale, products } from '@/data/products/index';
 
 const DealsPage = () => {
   const [dealsProducts, setDealsProducts] = useState<Product[]>([]);
@@ -11,7 +11,14 @@ const DealsPage = () => {
     // Get products on sale using the utility function
     const productsOnSale = getProductsOnSale();
     console.log("Sale products loaded:", productsOnSale.length);
-    setDealsProducts(productsOnSale);
+    
+    // Ensure we get some products even if there are no products on sale
+    if (productsOnSale.length === 0) {
+      // If no sale products, show some regular products as fallback
+      setDealsProducts(products.slice(0, 8));
+    } else {
+      setDealsProducts(productsOnSale);
+    }
   }, []);
   
   return (

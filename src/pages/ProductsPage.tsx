@@ -16,7 +16,7 @@ const sortOptions = [
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(allProducts);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   
@@ -55,9 +55,11 @@ const ProductsPage = () => {
       filtered = filtered.filter(p => selectedCategories.includes(p.category));
     }
     
-    filtered = filtered.filter(
-      p => (p.salePrice || p.price) >= priceRange[0] && (p.salePrice || p.price) <= priceRange[1]
-    );
+    if (priceRange[0] > 0 || priceRange[1] < 1000) {
+      filtered = filtered.filter(
+        p => (p.salePrice || p.price) >= priceRange[0] && (p.salePrice || p.price) <= priceRange[1]
+      );
+    }
     
     if (selectedTags.length > 0) {
       filtered = filtered.filter(p => 
@@ -84,7 +86,7 @@ const ProductsPage = () => {
     
     console.log("Filtered products:", filtered.length);
     setFilteredProducts(filtered);
-  }, [searchParam, selectedCategories, sortParam, priceRange, selectedTags, allProducts]);
+  }, [searchParam, selectedCategories, sortParam, priceRange, selectedTags]);
   
   const updateFilters = () => {
     const params: Record<string, string> = {};
