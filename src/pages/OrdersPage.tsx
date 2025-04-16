@@ -1,7 +1,6 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ChevronDown, ChevronRight, Truck, Clock, CheckCircle, AlertCircle, Star } from 'lucide-react';
+import { Package, ChevronDown, ChevronRight, Truck, Clock, CheckCircle, AlertCircle, Star, IndianRupee } from 'lucide-react';
 import { 
   Table, 
   TableHeader, 
@@ -20,6 +19,7 @@ import ReviewDisplay from '@/components/ReviewDisplay';
 import { submitProductReview } from '@/utils/dbUtils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Product } from '@/types/product';
+import { formatPriceINR } from '@/data/products';
 
 const OrdersPage = () => {
   const { user } = useAuth();
@@ -131,9 +131,8 @@ const OrdersPage = () => {
             </TableHeader>
             <TableBody>
               {orders.map((order) => (
-                <>
+                <React.Fragment key={order.id}>
                   <TableRow 
-                    key={order.id}
                     className="cursor-pointer hover:bg-gray-50"
                     onClick={() => toggleOrderDetails(order.id)}
                   >
@@ -147,7 +146,10 @@ const OrdersPage = () => {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">${order.totalAmount.toFixed(2)}</TableCell>
+                    <TableCell className="text-right flex items-center justify-end">
+                      <IndianRupee size={14} className="mr-1" />
+                      {formatPriceINR(order.totalAmount)}
+                    </TableCell>
                     <TableCell>
                       {expandedOrders.includes(order.id) ? 
                         <ChevronDown size={18} /> : 
@@ -156,7 +158,6 @@ const OrdersPage = () => {
                     </TableCell>
                   </TableRow>
                   
-                  {/* Expanded order details */}
                   {expandedOrders.includes(order.id) && (
                     <TableRow>
                       <TableCell colSpan={5} className="bg-gray-50 p-0">
@@ -215,14 +216,14 @@ const OrdersPage = () => {
                                         {item.color && <span>Color: {item.color}</span>}
                                         <span className="mx-2">Qty: {item.quantity}</span>
                                       </div>
-                                      <p className="text-sm font-medium">
-                                        ${(item.price * item.quantity).toFixed(2)}
+                                      <p className="text-sm font-medium flex items-center">
+                                        <IndianRupee size={12} className="mr-1" />
+                                        {formatPriceINR(item.price * item.quantity)}
                                       </p>
                                     </div>
                                   </div>
                                 </div>
 
-                                {/* Review section */}
                                 {order.status === 'delivered' && (
                                   <div className="ml-20 mt-2">
                                     {reviewingProduct && 
@@ -303,7 +304,7 @@ const OrdersPage = () => {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </TableBody>
           </Table>
