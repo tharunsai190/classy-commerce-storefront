@@ -138,7 +138,9 @@ const CheckoutPage = () => {
         quantity: item.quantity,
         size: item.size,
         color: item.color,
-        image: item.product.images[0]
+        image: item.product.images && item.product.images.length > 0 
+          ? item.product.images[0] 
+          : "https://images.unsplash.com/photo-1649972904349-6e44c42644a7"
       })),
       totalAmount: orderTotal,
       status: 'pending' as OrderStatus,

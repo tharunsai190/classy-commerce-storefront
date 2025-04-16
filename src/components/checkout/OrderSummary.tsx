@@ -24,7 +24,9 @@ const OrderSummary = ({ cartItems, cartTotal, shipping, tax, orderTotal }: Order
           <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex py-2 border-b last:border-b-0">
             <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0">
               <img 
-                src={item.product.images[0]} 
+                src={item.product.images && item.product.images.length > 0 
+                  ? item.product.images[0] 
+                  : "https://images.unsplash.com/photo-1649972904349-6e44c42644a7"} 
                 alt={item.product.name}
                 className="w-full h-full object-cover"
               />
