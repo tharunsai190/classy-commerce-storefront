@@ -35,13 +35,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   // Enhanced function to get a valid product image
   const getProductImage = () => {
-    if (!imageError && product.images && product.images.length > 0 && product.images[0]) {
+    if (!imageError && product?.images && product.images.length > 0 && product.images[0]) {
       return product.images[0];
     }
     
     // Use category-specific fallback or default fallback
-    return fallbackImages[product.category as keyof typeof fallbackImages] || fallbackImages.default;
+    const category = product?.category || 'default';
+    return fallbackImages[category as keyof typeof fallbackImages] || fallbackImages.default;
   };
+
+  if (!product) {
+    return null;
+  }
 
   return (
     <div className="group flex flex-col h-full bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
