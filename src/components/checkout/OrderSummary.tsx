@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CartItem } from '@/types/product';
 import { IndianRupee, Lock } from 'lucide-react';
