@@ -1,55 +1,31 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { Order, OrderItem } from '@/types/order';
 import { v4 as uuidv4 } from 'uuid';
+import { addOrder } from '@/data/orders';
 
 export const createOrder = async (order: Order) => {
   if (!order.userId) {
     throw new Error('User ID is required to create an order');
   }
 
-  // Convert shipping address to a plain object to satisfy Json type requirements
-  const shippingAddressJson = { ...order.shippingAddress };
-
-  const { data: newOrder, error: orderError } = await supabase
-    .from('orders')
-    .insert({
-      user_id: order.userId,
-      total_amount: order.totalAmount,
-      payment_method: order.paymentMethod,
-      payment_status: order.paymentStatus,
-      order_status: order.orderStatus,
-      shipping_address: shippingAddressJson,
-      tracking_id: order.trackingNumber,
-      estimated_delivery: order.estimatedDelivery
-    })
-    .select()
-    .single();
-
-  if (orderError) {
-    console.error('Error creating order:', orderError);
+  try {
+    // Generate a unique ID for the order
+    const newOrderId = `ORD-${uuidv4().slice(0, 8)}`;
+    
+    // Create a new order object with the generated ID
+    const newOrder = {
+      ...order,
+      id: newOrderId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Add the order to our mock database
+    const savedOrder = addOrder(newOrder);
+    
+    return savedOrder;
+  } catch (error) {
+    console.error('Error creating order:', error);
     throw new Error('Failed to create order');
   }
-
-  const orderItems = order.items.map((item: OrderItem) => ({
-    order_id: newOrder.id,
-    product_id: item.productId,
-    product_name: item.productName,
-    price: item.price,
-    quantity: item.quantity,
-    size: item.size,
-    color: item.color,
-    image: item.image
-  }));
-
-  const { error: itemsError } = await supabase
-    .from('order_items')
-    .insert(orderItems);
-
-  if (itemsError) {
-    console.error('Error creating order items:', itemsError);
-    throw new Error('Failed to create order items');
-  }
-
-  return newOrder;
 };
