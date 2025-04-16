@@ -4,29 +4,29 @@ import { Order, OrderItem } from '@/types/order';
 import { v4 as uuidv4 } from 'uuid';
 
 export const createOrder = async (order: Order) => {
-  // Generate a UUID for user_id if it's not in proper UUID format
-  let userId = order.userId;
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
-    userId = uuidv4(); // Generate a valid UUID
+  if (!order.userId) {
+    throw new Error('User ID is required to create an order');
   }
 
-  // Convert the address to JSON format for storage
   const { data: newOrder, error: orderError } = await supabase
     .from('orders')
     .insert({
-      user_id: userId,
+      user_id: order.userId,
       total_amount: order.totalAmount,
       payment_method: order.paymentMethod,
       payment_status: order.paymentStatus,
       order_status: order.orderStatus,
-      shipping_address: order.shippingAddress as any,
+      shipping_address: order.shippingAddress,
       tracking_id: order.trackingNumber,
       estimated_delivery: order.estimatedDelivery
     })
     .select()
     .single();
 
-  if (orderError) throw orderError;
+  if (orderError) {
+    console.error('Error creating order:', orderError);
+    throw new Error('Failed to create order');
+  }
 
   const orderItems = order.items.map((item: OrderItem) => ({
     order_id: newOrder.id,
@@ -43,7 +43,10 @@ export const createOrder = async (order: Order) => {
     .from('order_items')
     .insert(orderItems);
 
-  if (itemsError) throw itemsError;
+  if (itemsError) {
+    console.error('Error creating order items:', itemsError);
+    throw new Error('Failed to create order items');
+  }
 
   return newOrder;
 };
