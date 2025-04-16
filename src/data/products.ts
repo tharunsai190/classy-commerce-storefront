@@ -2,7 +2,7 @@ import { Product } from "@/types/product";
 
 export const USD_TO_INR = 75;
 
-export const products: Product[] = [
+const originalProducts: Product[] = [
   {
     id: "1",
     name: "Classic White T-Shirt",
@@ -585,7 +585,7 @@ const additionalProducts: Product[] = [
     name: "Smart Air Purifier",
     description: "HEPA air purifier with air quality monitoring and app control.",
     price: 29999,
-    images: ["https://images.unsplash.com/photo-1585771724684-38269d6639fd"],
+    images: ["https://images.unsplash.com/photo-1585771724684-104c94d37305"],
     category: "electronics",
     tags: ["air-purifier", "smart-home", "health"],
     rating: 4.8,
@@ -660,7 +660,7 @@ const additionalProducts: Product[] = [
 ];
 
 export const products: Product[] = [
-  ...products,
+  ...originalProducts,
   ...additionalProducts
 ];
 
