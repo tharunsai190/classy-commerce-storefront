@@ -21,20 +21,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
     });
   };
 
+  // Helper function to get the first valid image or fallback
+  const getProductImage = () => {
+    if (product.images && product.images.length > 0 && product.images[0]) {
+      return product.images[0];
+    }
+    return "https://images.unsplash.com/photo-1649972904349-6e44c42644a7";
+  };
+
   return (
     <div className="group flex flex-col h-full bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
       <Link to={`/product/${product.id}`} className="relative h-60 w-full overflow-hidden">
-        {product.images && product.images.length > 0 ? (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-500">No image</span>
-          </div>
-        )}
+        <img
+          src={getProductImage()}
+          alt={product.name}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
         {product.stock < 5 && (
           <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
             Low Stock
