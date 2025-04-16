@@ -31,12 +31,15 @@ const ProductsPage = () => {
   );
   const [priceRange, setPriceRange] = useState<[number, number]>([minPriceParam, maxPriceParam]);
   
+  console.log("All products count:", allProducts.length);
+  
   const categories = Array.from(new Set(allProducts.map(p => p.category)));
   const tags = Array.from(new Set(allProducts.flatMap(p => p.tags)));
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   useEffect(() => {
     let filtered = [...allProducts];
+    console.log("Initial products to filter:", filtered.length);
     
     if (searchParam) {
       const searchLower = searchParam.toLowerCase();
@@ -79,8 +82,9 @@ const ProductsPage = () => {
         filtered = filtered.filter(p => p.featured).concat(filtered.filter(p => !p.featured));
     }
     
+    console.log("Filtered products:", filtered.length);
     setFilteredProducts(filtered);
-  }, [searchParam, selectedCategories, sortParam, priceRange, selectedTags]);
+  }, [searchParam, selectedCategories, sortParam, priceRange, selectedTags, allProducts]);
   
   const updateFilters = () => {
     const params: Record<string, string> = {};
@@ -187,7 +191,7 @@ const ProductsPage = () => {
                       onChange={() => handleCategoryChange(category)}
                       className="rounded text-primary focus:ring-primary"
                     />
-                    <span className="capitalize">{category}</span>
+                    <span className="capitalize">{category.replace('_', ' ')}</span>
                   </label>
                 ))}
               </div>
@@ -283,7 +287,7 @@ const ProductsPage = () => {
           </div>
           
           {filteredProducts.length > 0 ? (
-            <div className="product-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}

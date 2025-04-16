@@ -34,6 +34,7 @@ const CategoryPage = () => {
   useEffect(() => {
     if (category) {
       const categoryProducts = getProductsByCategory(category as string);
+      console.log(`Loaded ${categoryProducts.length} products for category: ${category}`);
       setProducts(categoryProducts);
       setFilteredProducts(categoryProducts);
     }
@@ -62,7 +63,7 @@ const CategoryPage = () => {
   }, [products, sortBy]);
   
   // Format the category name for display
-  const formattedCategory = category ? category.charAt(0).toUpperCase() + category.slice(1) : '';
+  const formattedCategory = category ? category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ') : '';
   
   const bannerUrl = category ? categoryBanners[category as Category] || categoryBanners.accessories : '';
 
@@ -135,7 +136,7 @@ const CategoryPage = () => {
         
         {/* Products Grid */}
         {filteredProducts.length > 0 ? (
-          <div className="product-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}

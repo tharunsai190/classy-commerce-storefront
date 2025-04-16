@@ -51,7 +51,15 @@ export const getRelatedProducts = (productId: string, limit = 4): Product[] => {
 };
 
 export const getProductsOnSale = (): Product[] => {
-  return products.filter(product => product.salePrice !== undefined);
+  // If no products have salePrice, return some products to ensure the deals page isn't empty
+  const onSale = products.filter(product => product.salePrice !== undefined);
+  
+  if (onSale.length === 0) {
+    // Fallback: return some featured or bestseller products if no sale products exist
+    return getFeaturedProducts().slice(0, 8);
+  }
+  
+  return onSale;
 };
 
 export const formatPriceINR = (price: number): string => {

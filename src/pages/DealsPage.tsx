@@ -10,6 +10,7 @@ const DealsPage = () => {
   useEffect(() => {
     // Get products on sale using the utility function
     const productsOnSale = getProductsOnSale();
+    console.log("Sale products loaded:", productsOnSale.length);
     setDealsProducts(productsOnSale);
   }, []);
   
@@ -24,7 +25,10 @@ const DealsPage = () => {
           ))}
         </div>
       ) : (
-        <p className="text-center py-10 text-gray-500">No deals available at the moment.</p>
+        <div className="text-center py-10">
+          <p className="text-gray-500 mb-4">No deals available at the moment.</p>
+          <p className="text-sm text-gray-400">Check back later for exciting offers!</p>
+        </div>
       )}
     </div>
   );
