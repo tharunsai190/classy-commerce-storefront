@@ -8,6 +8,9 @@ export const createOrder = async (order: Order) => {
     throw new Error('User ID is required to create an order');
   }
 
+  // Convert shipping address to a plain object to satisfy Json type requirements
+  const shippingAddressJson = { ...order.shippingAddress };
+
   const { data: newOrder, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -16,7 +19,7 @@ export const createOrder = async (order: Order) => {
       payment_method: order.paymentMethod,
       payment_status: order.paymentStatus,
       order_status: order.orderStatus,
-      shipping_address: order.shippingAddress,
+      shipping_address: shippingAddressJson,
       tracking_id: order.trackingNumber,
       estimated_delivery: order.estimatedDelivery
     })
