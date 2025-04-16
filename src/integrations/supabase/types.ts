@@ -9,7 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      order_items: {
+        Row: {
+          color: string | null
+          id: string
+          image: string
+          order_id: string
+          price: number
+          product_id: string
+          product_name: string
+          quantity: number
+          size: string | null
+        }
+        Insert: {
+          color?: string | null
+          id?: string
+          image: string
+          order_id: string
+          price: number
+          product_id: string
+          product_name: string
+          quantity: number
+          size?: string | null
+        }
+        Update: {
+          color?: string | null
+          id?: string
+          image?: string
+          order_id?: string
+          price?: number
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          size?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          estimated_delivery: string | null
+          id: string
+          order_status: string
+          payment_method: string
+          payment_status: string
+          shipping_address: Json
+          total_amount: number
+          tracking_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_delivery?: string | null
+          id?: string
+          order_status: string
+          payment_method: string
+          payment_status: string
+          shipping_address: Json
+          total_amount: number
+          tracking_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          estimated_delivery?: string | null
+          id?: string
+          order_status?: string
+          payment_method?: string
+          payment_status?: string
+          shipping_address?: Json
+          total_amount?: number
+          tracking_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

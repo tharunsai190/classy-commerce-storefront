@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Package, ChevronDown, ChevronRight, Truck, Clock, CheckCircle, AlertCircle, Star, IndianRupee } from 'lucide-react';
 import { 
   Table, 
@@ -10,23 +10,20 @@ import {
   TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { getUserOrders } from '@/data/orders';
-import { Order, OrderStatus } from '@/types/order';
+import { OrderStatus } from '@/types/order';
 import { format } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewDisplay from '@/components/ReviewDisplay';
 import { submitProductReview } from '@/utils/dbUtils';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Product } from '@/types/product';
 import { formatPriceINR } from '@/data/products';
+import { useOrders } from '@/hooks/useOrders';
+import { toast } from 'sonner';
 
 const OrdersPage = () => {
-  const { user } = useAuth();
-  // In a real app, you would get the user ID from authentication
-  const userId = user?.id || "user-123";
-  const orders = getUserOrders(userId);
-  
+  const { user, isAuthenticated } = useAuth();
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
   const [reviewingProduct, setReviewingProduct] = useState<{
     orderId: string;
@@ -34,6 +31,36 @@ const OrdersPage = () => {
   } | null>(null);
   const [showReviews, setShowReviews] = useState<{[key: string]: boolean}>({});
   
+  const { data: orders, isLoading, error } = useOrders(user?.id || '');
+
+  if (!isAuthenticated) {
+    toast.error('Please sign in to view orders');
+    return <Navigate to="/account" />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container py-8">
+        <div className="flex items-center mb-6">
+          <Package size={24} className="mr-2 text-primary" />
+          <h1 className="text-3xl font-bold">My Orders</h1>
+        </div>
+        <div className="text-center py-8">Loading orders...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Error fetching orders:', error);
+    return (
+      <div className="container py-8">
+        <div className="text-center text-red-500">
+          Error loading orders. Please try again later.
+        </div>
+      </div>
+    );
+  }
+
   const toggleOrderDetails = (orderId: string) => {
     if (expandedOrders.includes(orderId)) {
       setExpandedOrders(expandedOrders.filter(id => id !== orderId));
@@ -109,7 +136,7 @@ const OrdersPage = () => {
         <h1 className="text-3xl font-bold">My Orders</h1>
       </div>
       
-      {orders.length === 0 ? (
+      {(!orders || orders.length === 0) ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <h3 className="text-lg font-medium mb-2">You haven't placed any orders yet</h3>
           <p className="text-gray-500 mb-4">Once you place an order, it will appear here.</p>
