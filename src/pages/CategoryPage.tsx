@@ -33,7 +33,7 @@ const CategoryPage = () => {
   // Load products for category
   useEffect(() => {
     if (category) {
-      const categoryProducts = getProductsByCategory(category);
+      const categoryProducts = getProductsByCategory(category as string);
       setProducts(categoryProducts);
       setFilteredProducts(categoryProducts);
     }

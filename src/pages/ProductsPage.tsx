@@ -4,7 +4,7 @@ import { Filter, SlidersHorizontal, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { Product } from '@/types/product';
-import { products } from '@/data/products/index';
+import { products as allProducts } from '@/data/products/index';
 
 const sortOptions = [
   { label: 'Featured', value: 'featured' },
@@ -31,12 +31,12 @@ const ProductsPage = () => {
   );
   const [priceRange, setPriceRange] = useState<[number, number]>([minPriceParam, maxPriceParam]);
   
-  const categories = Array.from(new Set(products.map(p => p.category)));
-  const tags = Array.from(new Set(products.flatMap(p => p.tags)));
+  const categories = Array.from(new Set(allProducts.map(p => p.category)));
+  const tags = Array.from(new Set(allProducts.flatMap(p => p.tags)));
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   useEffect(() => {
-    let filtered = [...products];
+    let filtered = [...allProducts];
     
     if (searchParam) {
       const searchLower = searchParam.toLowerCase();
