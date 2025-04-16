@@ -5,13 +5,25 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { formatPriceINR } from '@/data/products';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
 }
 
+// Collection of fallback images by category
+const fallbackImages = {
+  men: "https://images.unsplash.com/photo-1617137968427-85924c800b22",
+  women: "https://images.unsplash.com/photo-1612336307429-8a898d10e223",
+  electronics: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1",
+  accessories: "https://images.unsplash.com/photo-1576243345690-4e4b79b63288",
+  home_kitchen: "https://images.unsplash.com/photo-1584917865442-de89df41a097",
+  default: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7"
+};
+
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
+  const [imageError, setImageError] = useState(false);
   
   const handleAddToCart = () => {
     addToCart(product, 1);
@@ -21,12 +33,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
     });
   };
 
-  // Helper function to get the first valid image or fallback
+  // Enhanced function to get a valid product image
   const getProductImage = () => {
-    if (product.images && product.images.length > 0 && product.images[0]) {
+    if (!imageError && product.images && product.images.length > 0 && product.images[0]) {
       return product.images[0];
     }
-    return "https://images.unsplash.com/photo-1649972904349-6e44c42644a7";
+    
+    // Use category-specific fallback or default fallback
+    return fallbackImages[product.category as keyof typeof fallbackImages] || fallbackImages.default;
   };
 
   return (
@@ -36,6 +50,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           src={getProductImage()}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          onError={() => setImageError(true)}
         />
         {product.stock < 5 && (
           <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
